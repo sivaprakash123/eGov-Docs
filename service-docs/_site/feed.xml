@@ -1,0 +1,1036 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>eGovernments foundations</title>
+    <description>eGovernments Foundation transforms urban governance with the use of scalable and replicable technology solutions that enable efficient and effective municipal operations, better decision making, and contact-less urban service delivery..
+</description>
+    <link>http://localhost:4000/</link>
+    <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Thu, 01 Mar 2018 14:38:23 +0530</pubDate>
+    <lastBuildDate>Thu, 01 Mar 2018 14:38:23 +0530</lastBuildDate>
+    <generator>Jekyll v3.7.2</generator>
+    
+      <item>
+        <title>Report service</title>
+        <description>&lt;h2&gt;Reports Service&lt;/h2&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;The eGov Reporting Service is a common service running independently, which has provision to generate client defined or required reports for all modules in common, with a single configurable .yml file for each module respectively.
+The service allows to retrieve the data from data store through a set of configurations. This service loads the report configuration from a yaml file at the run time and provides the report details from data store.&lt;/p&gt;
+&lt;p&gt;Report service provides following functionalities&lt;/p&gt;
+&lt;li&gt;Provides metadata about the report.&lt;/li&gt;
+&lt;li&gt;Provides the data for the report.&lt;/li&gt;
+&lt;li&gt;Reload the configuration at runtime&lt;/li&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h3&gt;Architecture of Report service&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&quot;/images/report.png&quot; alt=&quot;mdms architecture&quot; class=&quot;img-responsive&quot; /&gt;&lt;/p&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;Report service is a common component, which will process the request against yml configurations, prepares queries and get data from database and gives back in response. The yml configuration file path, which are configured in the reportFileLocations.txt file are loaded in the application cache memory at the time of deployment of the application or on calling reload api.&lt;/p&gt;
+
+&lt;p&gt;Yml configuration structure&lt;/p&gt;
+&lt;pre&gt;
+&lt;b&gt;reportName:&lt;/b&gt; Name of the report
+&lt;b&gt;summary:&lt;/b&gt; Summary message for the report(AssetReport)
+&lt;b&gt;version:&lt;/b&gt; version of the report(optional)
+&lt;b&gt;moduleName:&lt;/b&gt; modulename of which the report belongs to (eg : asset)
+&lt;b&gt;sourceColumns:&lt;/b&gt; - (list of source columns fetched from the query.)
+&lt;b&gt;name:&lt;/b&gt; receiptNo (column name)
+&lt;b&gt;label:&lt;/b&gt; reports.citizen.receiptno (label which will get displayed in the report)
+&lt;b&gt;type:&lt;/b&gt; string (type of the column)
+&lt;b&gt;source:&lt;/b&gt; citizen (source module)
+&lt;b&gt;searchParams:&lt;/b&gt;(list of search parameters which is required for the report)
+&lt;b&gt;name:&lt;/b&gt; consumerno (name of the search param)
+&lt;b&gt;label:&lt;/b&gt; reports.citizen.consumerno (label which will be used for displaying the search param. It has to be created in common.js Front end team will update this information)
+&lt;b&gt;type:&lt;/b&gt; string (type of the search param)
+&lt;b&gt;source:&lt;/b&gt; (source module)
+&lt;b&gt;isMandatory:&lt;/b&gt; false (specifies whether the search param is optional or not)
+&lt;b&gt;searchClause:&lt;/b&gt; and consumerNo = $consumerno (Search clause will get appended to the query based on the ismandatory flag. if it is false and the search param is having that parameter then it will get appended otherwise it will not get appended)
+&lt;b&gt;query:&lt;/b&gt; (query string which needs to get execute to generate the report with the place holders for the search params. refer sample config for clarifications)
+&lt;b&gt;groupby:&lt;/b&gt; group by clause if needed(group by fieldname)
+&lt;b&gt;orderby:&lt;/b&gt; order by clause if needed(order by fieldname asc)
+&lt;/pre&gt;
+&lt;p&gt;&lt;b&gt;Example:&lt;b&gt;&lt;/b&gt;&lt;/b&gt;&lt;/p&gt;
+&lt;pre&gt;
+- reportName: CitizenService
+  summary: Citizen Services Report
+  version: 1.0.0
+  moduleName: citizen
+  sourceColumns:
+  - name: receiptNo
+    label: reports.citizen.receiptno
+    type: string
+    source: citizen
+  - name: receiptDate
+    label: reports.citizen.receiptdate
+    type: number
+    source: citizen
+  - name: totalAmount
+    label: reports.citizen.totalamount
+    type: number
+    source: citizen
+  - name: payeeName
+    label: reports.citizen.payeename
+    type: number
+    source: citizen
+  - name: consumerAddress
+    label: reports.citizen.consumeraddress
+    type: number
+    source: citizen
+  - name: print
+    label: reports.citizen.print
+    type: number
+    source: citizen
+    linkedReport:
+      reportName: ReceiptDetail
+      linkedColumn: _url?/pgr/viewGrievance/:srn
+  searchParams:
+  - name: consumerno
+    label: reports.citizen.consumerno
+    type: string
+    source: citizen
+    isMandatory: false
+    searchClause: and consumerNo = $consumerno
+  - name: receiptno
+    label: reports.citizen.receiptno
+    type: string
+    source: citizen
+    isMandatory: false
+    searchClause: and receiptno = $receiptno
+  query: select receiptNo,receiptDate,totalAmount,payeeName,consumerAddress,'print' as print from egcl_legacy_receipt_header where tenantid = $tenantid
+&lt;/pre&gt;
+
+&lt;p&gt;&lt;b&gt;Configurations&lt;/b&gt;&lt;/p&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;Standard convention of placing the yml configuration file is, under docs individual module folder will be there. Under module folder create folder with name report. Place the yml configuration file under report folder.
+Add the module specific configuration location path in &lt;b&gt;reportFileLocations.txt&lt;/b&gt;, which is in egov-services/docs/reportinfra/report/ path. The Report service will pull all configurations from git, which are specified in the path, and store in cache on loading the service.&lt;/p&gt;
+&lt;p class=&quot;text-justify&quot;&gt;Note: After adding or modifying configs build and deploying the report service is must. OR call reload api.&lt;br /&gt;
+&lt;b&gt;Example:&lt;/b&gt;&lt;br /&gt;
+Let us create a configurations for module asset. Create a folder with name report under respective module folder(Asset), which will be under docs. Create yml file in report folder. Configure according to the structure as mentioned above in yml configuration section. Configure the yml file path in &lt;b&gt;reportFileLocations.txt&lt;/b&gt;, which is in &lt;b&gt;egov-services/docs/ reportinfra/report/&lt;/b&gt; path. Initiate report service reload api, so that it will refresh the app cache with updated conf.&lt;/p&gt;
+&lt;p&gt;&lt;b&gt;API Details:&lt;/b&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;li&gt;Get Report Metadata:&lt;/li&gt;
+
+&lt;p&gt;/report/asset/metadata/_get&lt;/p&gt;
+
+&lt;p&gt;Payload for get api should have Requestinfo, tenantId and reportName. This api will provide the details of the specified report.&lt;/p&gt;
+
+&lt;p&gt;Request json fromat:&lt;/p&gt;
+&lt;pre&gt;
+{
+  &quot;RequestInfo&quot;: {
+    &quot;apiId&quot;: &quot;emp&quot;,
+    &quot;ver&quot;: &quot;1.0&quot;,
+    &quot;ts&quot;: &quot;10-03-2017 00:00:00&quot;,
+    &quot;action&quot;: &quot;create&quot;,
+    &quot;did&quot;: &quot;1&quot;,
+    &quot;key&quot;: &quot;abcdkey&quot;,
+    &quot;msgId&quot;: &quot;20170310130900&quot;,
+    &quot;requesterId&quot;: &quot;rajesh&quot;,
+    &quot;authToken&quot;: &quot;0348d66f-d818-47fc-933b-ba23079986b8&quot;
+  },
+  &quot;tenantId&quot;: &quot;default&quot;,
+  &quot;reportName&quot;: &quot;ImmovableAssetRegister&quot;
+}
+&lt;/pre&gt;
+&lt;p&gt;Response json format: &lt;br /&gt;The response json will be consist of Report details, which will be consisting list of report Header(Column headers) and list of searchParams.&lt;/p&gt;
+&lt;pre&gt;
+{
+  &quot;requestInfo&quot;: {
+    &quot;apiId&quot;: &quot;emp&quot;,
+    &quot;ver&quot;: &quot;1.0&quot;,
+    &quot;ts&quot;: &quot;Fri Mar 10 00:00:00 IST 2017&quot;,
+    &quot;resMsgId&quot;: &quot;uief87324&quot;,
+    &quot;msgId&quot;: &quot;20170310130900&quot;,
+    &quot;status&quot;: &quot;200&quot;
+  },
+  &quot;tenantId&quot;: &quot;default&quot;,
+  &quot;reportDetails&quot;: {
+    &quot;reportName&quot;: &quot;AssetImmovableRegister&quot;,
+    &quot;serialNo&quot;: false,
+    &quot;sorting&quot;: true,
+    &quot;searchFilter&quot;: false,
+    &quot;viewPath&quot;: &quot;assetImmovableReport&quot;,
+    &quot;selectiveDownload&quot;: true,
+    &quot;summary&quot;: &quot;Immovable Asset Register Report&quot;,
+    &quot;reportHeader&quot;: [
+      {
+        &quot;name&quot;: &quot;name&quot;,
+        &quot;label&quot;: &quot;reports.asset.name&quot;,
+        &quot;type&quot;: &quot;string&quot;,
+        &quot;defaultValue&quot;: null,
+        &quot;isMandatory&quot;: false,
+        &quot;showColumn&quot;: true,
+        &quot;total&quot;: false,
+        &quot;rowTotal&quot;: null,
+        &quot;columnTotal&quot;: null
+      },
+      {
+        &quot;name&quot;: &quot;code&quot;,
+        &quot;label&quot;: &quot;reports.asset.code&quot;,
+        &quot;type&quot;: &quot;string&quot;,
+        &quot;defaultValue&quot;: null,
+        &quot;isMandatory&quot;: false,
+        &quot;showColumn&quot;: true,
+        &quot;total&quot;: false,
+        &quot;rowTotal&quot;: null,
+        &quot;columnTotal&quot;: null
+      },
+      {
+        &quot;name&quot;: &quot;dateofcreation&quot;,
+        &quot;label&quot;: &quot;reports.asset.dateofcreation&quot;,
+        &quot;type&quot;: &quot;epoch&quot;,
+        &quot;defaultValue&quot;: null,
+        &quot;isMandatory&quot;: false,
+        &quot;showColumn&quot;: true,
+        &quot;total&quot;: false,
+        &quot;rowTotal&quot;: null,
+        &quot;columnTotal&quot;: null
+      }
+    ],
+    &quot;searchParams&quot;: [
+      {
+        &quot;name&quot;: &quot;assetcategory&quot;,
+        &quot;label&quot;: &quot;reports.asset.assetCategory&quot;,
+        &quot;type&quot;: &quot;singlevaluelist&quot;,
+        &quot;defaultValue&quot;: {
+          &quot;1&quot;: &quot;Building&quot;,
+          &quot;2&quot;: &quot;Infrastructure assets&quot;,
+          &quot;3&quot;: &quot;Plant and Machinery&quot;,
+          &quot;4&quot;: &quot;Electrical Installations&quot;,
+          &quot;2010&quot;: &quot;RI-Office&quot;
+        },
+        &quot;isMandatory&quot;: false,
+        &quot;showColumn&quot;: true,
+        &quot;total&quot;: false,
+        &quot;rowTotal&quot;: null,
+        &quot;columnTotal&quot;: null
+      },
+      {
+        &quot;name&quot;: &quot;assetsubcategory&quot;,
+        &quot;label&quot;: &quot;reports.asset.assetSubCategory&quot;,
+        &quot;type&quot;: &quot;url&quot;,
+        &quot;defaultValue&quot;: &quot;/egov-mdms-service/v1/_get?moduleName=ASSET&amp;amp;masterName=AssetCategory&amp;amp;tenantId=$tenantid&amp;amp;filter=%5B%3F(%20%40.parent%3D%3D{assetcategory})%5D|$.MdmsRes.ASSET.AssetCategory.*.id|$.MdmsRes.ASSET.AssetCategory.*.name&quot;,
+        &quot;isMandatory&quot;: false,
+        &quot;showColumn&quot;: true,
+        &quot;total&quot;: false,
+        &quot;rowTotal&quot;: null,
+        &quot;columnTotal&quot;: null
+      },
+      {
+        &quot;name&quot;: &quot;department&quot;,
+        &quot;label&quot;: &quot;reports.asset.departmentCode&quot;,
+        &quot;type&quot;: &quot;singlevaluelist&quot;,
+        &quot;defaultValue&quot;: {
+          &quot;ACC&quot;: &quot;ACCOUNTS&quot;,
+          &quot;REV&quot;: &quot;REVENUE&quot;,
+          &quot;UPA&quot;: &quot;URBAN POVERTY ALLEVIATION&quot;,
+          &quot;EDU&quot;: &quot;EDUCATION&quot;,
+          &quot;ADM&quot;: &quot;ADMINISTRATION&quot;,
+          &quot;PHS&quot;: &quot;PUBLIC HEALTH AND SANITATION&quot;,
+          &quot;TP&quot;: &quot;TOWN PLANNING&quot;,
+          &quot;ENG&quot;: &quot;ENGINEERING&quot;
+        },
+        &quot;isMandatory&quot;: false,
+        &quot;showColumn&quot;: true,
+        &quot;total&quot;: false,
+        &quot;rowTotal&quot;: null,
+        &quot;columnTotal&quot;: null
+      },
+      {
+        &quot;name&quot;: &quot;code&quot;,
+        &quot;label&quot;: &quot;reports.asset.code&quot;,
+        &quot;type&quot;: &quot;string&quot;,
+        &quot;defaultValue&quot;: null,
+        &quot;isMandatory&quot;: false,
+        &quot;showColumn&quot;: true,
+        &quot;total&quot;: false,
+        &quot;rowTotal&quot;: null,
+        &quot;columnTotal&quot;: null
+      }
+    ]
+  }
+}
+&lt;/pre&gt;
+
+&lt;li&gt;/report/asset/_get&lt;/li&gt;
+
+&lt;p&gt;Payload for get api should have Requestinfo, tenantId, reportName and search params. This api will provide the report data of respective report name based on search params provided in searchParams tag .
+Sample Request:&lt;/p&gt;
+&lt;pre&gt;
+{
+  &quot;RequestInfo&quot;: {
+    &quot;apiId&quot;: &quot;emp&quot;,
+    &quot;ver&quot;: &quot;1.0&quot;,
+    &quot;ts&quot;: &quot;10-03-2017 00:00:00&quot;,
+    &quot;action&quot;: &quot;create&quot;,
+    &quot;did&quot;: &quot;1&quot;,
+    &quot;key&quot;: &quot;abcdkey&quot;,
+    &quot;msgId&quot;: &quot;20170310130900&quot;,
+    &quot;requesterId&quot;: &quot;rajesh&quot;,
+    &quot;authToken&quot;: &quot;39b6d8aa-e312-441e-8162-7032ae1303e1&quot;
+  },
+  &quot;tenantId&quot;: &quot;default&quot;,
+  &quot;reportName&quot;: &quot;ImmovableAssetRegister&quot;,
+  &quot;searchParams&quot;: [
+    {
+      &quot;name&quot;: &quot;assetid&quot;,
+      &quot;input&quot;: [
+        	&quot;283”,
+”300”,
+”128&quot;
+      ]
+    }
+  ]
+}
+&lt;/pre&gt;
+&lt;p&gt;Response json format: &lt;br /&gt;Response json will consist of list of report headers, which are column headers and list of report data, which will be list of list. The report data will be consist of list of records to be displayed in report with respect to headers.&lt;/p&gt;
+&lt;pre&gt;
+{
+  &quot;viewPath&quot;: &quot;assetImmovableReport&quot;,
+  &quot;selectiveDownload&quot;: true,
+  &quot;reportHeader&quot;: [
+    {
+      &quot;name&quot;: &quot;id&quot;,
+      &quot;label&quot;: &quot;reports.asset.id&quot;,
+      &quot;type&quot;: &quot;number&quot;,
+      &quot;defaultValue&quot;: null,
+      &quot;isMandatory&quot;: false,
+      &quot;showColumn&quot;: true,
+      &quot;total&quot;: false,
+      &quot;rowTotal&quot;: null,
+      &quot;columnTotal&quot;: null
+    },
+    {
+      &quot;name&quot;: &quot;quantity&quot;,
+      &quot;label&quot;: &quot;reports.asset.quantity&quot;,
+      &quot;type&quot;: &quot;number&quot;,
+      &quot;defaultValue&quot;: null,
+      &quot;isMandatory&quot;: false,
+      &quot;showColumn&quot;: true,
+      &quot;total&quot;: false,
+      &quot;rowTotal&quot;: null,
+      &quot;columnTotal&quot;: null
+    },
+    {
+      &quot;name&quot;: &quot;plintharea&quot;,
+      &quot;label&quot;: &quot;reports.asset.plintharea&quot;,
+      &quot;type&quot;: &quot;number&quot;,
+      &quot;defaultValue&quot;: null,
+      &quot;isMandatory&quot;: false,
+      &quot;showColumn&quot;: true,
+      &quot;total&quot;: false,
+      &quot;rowTotal&quot;: null,
+      &quot;columnTotal&quot;: null
+    },
+    {
+      &quot;name&quot;: &quot;cubiccontents&quot;,
+      &quot;label&quot;: &quot;reports.asset.cubiccontents&quot;,
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;defaultValue&quot;: null,
+      &quot;isMandatory&quot;: false,
+      &quot;showColumn&quot;: true,
+      &quot;total&quot;: false,
+      &quot;rowTotal&quot;: null,
+      &quot;columnTotal&quot;: null
+    },
+    {
+      &quot;name&quot;: &quot;landsurveyno&quot;,
+      &quot;label&quot;: &quot;reports.asset.landsurveyno&quot;,
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;defaultValue&quot;: null,
+      &quot;isMandatory&quot;: false,
+      &quot;showColumn&quot;: true,
+      &quot;total&quot;: false,
+      &quot;rowTotal&quot;: null,
+      &quot;columnTotal&quot;: null
+    }
+  ],
+  &quot;ttl&quot;: null,
+  &quot;reportData&quot;: [
+    [
+      283,
+      3,
+      null,
+      null,
+      null
+    ],
+    [
+      300,
+      3,
+      null,
+      null,
+      null
+    ],
+    [
+      128,
+      2,
+      null,
+      null,
+      null
+    ]
+  ]
+}
+&lt;/pre&gt;
+
+&lt;li&gt; /report/_reload&lt;/li&gt;
+
+&lt;p&gt;Reload api is developed to avoid building the service and deploying on every change of yml configs. This api will refresh the cache and reloads all updated configs in app cache.
+Sample Request:&lt;/p&gt;
+&lt;pre&gt;
+{
+  &quot;RequestInfo&quot;: {
+    &quot;apiId&quot;: &quot;emp&quot;,
+    &quot;ver&quot;: &quot;1.0&quot;,
+    &quot;ts&quot;: &quot;10-03-2017 00:00:00&quot;,
+    &quot;action&quot;: &quot;create&quot;,
+    &quot;did&quot;: &quot;1&quot;,
+    &quot;key&quot;: &quot;abcdkey&quot;,
+    &quot;msgId&quot;: &quot;20170310130900&quot;,
+    &quot;requesterId&quot;: &quot;rajesh&quot;,
+    &quot;authToken&quot;: &quot;3081f773-159b-455b-b977-acfd6ed2c61b&quot;
+  },
+  &quot;tenantId&quot;: &quot;default&quot;
+}
+&lt;/pre&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;For more information refer the report service design in :https://raw.githubusercontent.com/egovernments/egov-services/master/docs/reportinfra/contracts/reportinfra-1-0-0.yml
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;b&gt;Testing Report service&lt;/b&gt;&lt;/p&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;Report service can be tested by initiating a create api of respective module from postman. If validation and business logic executes successfully, the request is sent to kafka queue with unique topic name. After placing the request in to kafka queue, the api will give the response back with successful status and sequence generated ids or code(Unique key with client specified  standard format).
+Initiate /report/{asset}/_get api with ids or codes as search params, which we got from create response. It should return the data as we got in create api response, which means Report service is working fine.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 13 Feb 2018 14:00:04 +0530</pubDate>
+        <!-- <link>http://localhost:4000/report/2018/02/13/Report-service.html</link> -->
+        <guid isPermaLink="true">http://localhost:4000/report/2018/02/13/Report-service.html</guid>
+        
+        
+        <category>report</category>
+        
+      </item>
+    
+      <item>
+        <title>Mdmscreate Document</title>
+        <description>&lt;p class=&quot;text-justify&quot;&gt;&lt;b&gt;Master data management system Create(MDMS-Create)&lt;/b&gt;&lt;br /&gt;
+MDMS is a comprehensive method of enabling an enterprise to link all of its critical data to one place, called a master data, that provides a common point of reference. Master data is common data which will be added or modified once in a while in the system. To reduce the effort of creating API’s for master data maintenance for individual modules, MDMS Create Service is been introduced. MDMS-Create provides common API’s for maintenance of all modules master data.&lt;/p&gt;
+
+&lt;h3&gt;&lt;b&gt;Data considered as master data&lt;/b&gt;&lt;/h3&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;Master data is the consistent and uniform set of identifiers and extended attributes that describes the core entities of the enterprise. The data which is consistent, non transactional and will be added or modified once in a while are considered to be a master data.&lt;/p&gt;
+&lt;p&gt;Example : Department.&lt;/p&gt;
+
+&lt;p&gt;Departments in an organization remains same throughout and added or modified rarely.&lt;/p&gt;
+&lt;pre&gt;
+{
+  &quot;tenantId&quot;: &quot;default&quot;,
+  &quot;moduleName&quot;: &quot;common-masters&quot;,
+  &quot;Department&quot;: [
+    {
+      &quot;id&quot;: &quot;1&quot;,
+      &quot;name&quot;: &quot;ADMINISTRATION&quot;,
+      &quot;code&quot;: &quot;ADM&quot;,
+      &quot;active&quot;: &quot;true&quot;,
+      &quot;tenantId&quot;: &quot;default&quot;
+    },{
+      &quot;active&quot;: &quot;true&quot;,
+      &quot;tenantId&quot;: &quot;default&quot;
+      &quot;id&quot;: &quot;2&quot;,
+      &quot;name&quot;: &quot;ACCOUNTS&quot;,
+      &quot;code&quot;: &quot;ACC&quot;,
+
+    },{
+      &quot;id&quot;: &quot;5&quot;,
+      &quot;name&quot;: &quot;ENGINEERING&quot;,
+      &quot;code&quot;: &quot;ENG&quot;,
+      &quot;active&quot;: &quot;true&quot;,
+      &quot;tenantId&quot;: &quot;default&quot;
+    },
+    {
+      &quot;id&quot;: &quot;7&quot;,
+      &quot;name&quot;: &quot;TOWN PLANNING&quot;,
+      &quot;code&quot;: &quot;TP&quot;,
+      &quot;active&quot;: &quot;true&quot;,
+      &quot;tenantId&quot;: &quot;default&quot;
+    }
+}
+&lt;/pre&gt;
+
+&lt;p&gt;Architecture of MDMS
+&lt;img src=&quot;/images/mdms arch.png&quot; alt=&quot;mdms architecture&quot; class=&quot;img-responsive&quot; /&gt;&lt;/p&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;&lt;b&gt;Organization of MDMS Data:&lt;/b&gt;&lt;br /&gt;
+MDMS stores master data in json file. The folder structure of a GIT is as follows :
+Repository where Master data is stored is egov-mdms-data.
+Under egov-mdms-data repository, there is a data folder.
+Under data folder, there will be a folder with state level tenant name ex:  “mh”, where Maharastra specific statewide master data will be published.
+Under state level tenant folder, there will be “tenant” folders where ulb specific master data will be checked in. for example “mh.roha”
+Each module will have one folder for statewide and ulb wide master data. The folder name should be same as module name.
+Under the modules, individual master data is stored in individual json file. The file name should be same as master name.&lt;/p&gt;
+&lt;p&gt;Note- Be very sure of what we are keeping as master data. No transaction data should be added here.&lt;/p&gt;
+
+&lt;p&gt;&lt;b&gt;API’s available in MDMS are as follows:&lt;/b&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;li&gt;MDMS create/update&lt;/li&gt;
+&lt;p&gt;&lt;a href=&quot;#&quot; class=&quot;btn btn--primary&quot;&gt;http://egov-micro-dev.egovernments.org/egov-mdms-create/v1/_create&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&quot;#&quot; class=&quot;btn btn--primary&quot;&gt;http://egov-micro-dev.egovernments.org/egov-mdms-create/v1/_update&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Payload for both create and update should have Requestinfo and MasterMetaData, under which tenantId, moduleName and masterName and masterData should be present.&lt;/p&gt;
+
+&lt;p&gt;Format of request:&lt;/p&gt;
+&lt;pre&gt;
+{
+“RequestInfo”: {}
+&quot;MasterMetaData&quot;: {
+    &quot;masterData&quot;: List of master data,
+    &quot;tenantId&quot;: &quot;Tenant id&quot;,
+    &quot;moduleName&quot;: &quot;Module name&quot;,
+    &quot;masterName&quot;: &quot;Master name&quot;
+  }
+}
+&lt;/pre&gt;
+&lt;p&gt;for more information, have a look on swagger. &lt;a href=&quot;#&quot; class=&quot;btn btn--primary&quot;&gt;https://raw.githubusercontent.com/egovernments/egov-services/master/docs/mdms/contract/mdms-create-v1-0-0.yml
+Example :&lt;/a&gt;&lt;/p&gt;
+&lt;pre&gt;
+{
+  &quot;MasterMetaData&quot;: {
+    &quot;masterData&quot;: [
+      {
+        &quot;tenantId&quot;: &quot;default&quot;,
+        &quot;id&quot;: &quot;14&quot;,
+        &quot;name&quot;: &quot;Water Ways&quot;,
+        &quot;code&quot;: &quot;014&quot;
+      }
+    ],
+    &quot;tenantId&quot;: &quot;default&quot;,
+    &quot;moduleName&quot;: &quot;ASSET&quot;,
+    &quot;masterName&quot;: &quot;AssetCategory&quot;
+  },
+  &quot;RequestInfo&quot;: {
+    &quot;apiId&quot;: &quot;org.egov.pt&quot;,
+    &quot;ver&quot;: &quot;1.0&quot;,
+    &quot;ts&quot;: 1513338399194,
+    &quot;action&quot;: &quot;asd&quot;,
+    &quot;did&quot;: &quot;4354648646&quot;,
+    &quot;key&quot;: &quot;xyz&quot;,
+    &quot;msgId&quot;: &quot;654654&quot;,
+    &quot;requesterId&quot;: &quot;61&quot;,
+    &quot;authToken&quot;: &quot;6bcde78c-2ef8-453c-a2ac-16c44fded416&quot;
+  }
+}
+&lt;/pre&gt;
+&lt;p&gt;Example:&lt;/p&gt;
+
+&lt;p&gt;Note: For MDMS create or update unique or primary key constraints needs to be configured in master-config.json in MDMS create service resources folder.&lt;/p&gt;
+&lt;pre&gt;
+{
+  &quot;ASSET&quot;: {
+    &quot;AssetCategory&quot;: {
+      &quot;masterName&quot;: &quot;AssetCategory&quot;,
+      &quot;moduleDefinition&quot;: null,
+      &quot;isStateLevel&quot;: true,
+      &quot;uniqueKeys&quot;: [
+        &quot;$.id&quot;,
+        &quot;$.tenantId&quot;
+      ]
+    }
+  }
+}
+&lt;/pre&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;When we hit create request, the mdms-create service will go through master-config.json, validates the request against the configuration. If validation holds good then it will insert a requested record in the specified master file. If the Master file does not exist and corresponding configuration is present in master-config file, then it will create the file with the requested data. The application will give the exception, if there is no master configuration in master-config.json file related to requested master, even if the master file exists in the repository.&lt;br /&gt;
+For update, the data is updated on the bases of configurations (unique key/primary key constraints) in &lt;b&gt;master-config.json&lt;/b&gt;.&lt;br /&gt;
+If we modify the master-config.json file or any other config file, then respective services must build and deployed for reflecting modifications.&lt;br /&gt;
+When we build and deploy the service, the application will loads up all our configurations from config files in a map. Whenever the application needs configs, it will get it done from the map.&lt;/p&gt;
+
+&lt;li&gt;MDMS Search:&lt;/li&gt;
+&lt;p&gt;&lt;a href=&quot;#&quot; class=&quot;btn btn--primary&quot;&gt;http://egov-micro-dev.egovernments.org/egov-mdms-service/v1/_search&lt;/a&gt;&lt;br /&gt;
+MDMS search API provides to get the data from the master data. It also provides an attribute called filter, where in we can provide filter expressions. Based on filter expression, search API will filter the data and provide the response. Example:
+[?(@.id==1||@.id==2)] This expression will filter the master data by id equals to 1 or 2.
+[?( @.id == 10 &amp;amp;&amp;amp; @.tenantId ==’default’)] This expression will filter the master data by id equals to 10 and tenantId=default.&lt;br /&gt;
+For more information on filter expression please go through &lt;a href=&quot;http://goessner.net/articles/JsonPath/&quot; class=&quot;btn btn--primary&quot;&gt;http://goessner.net/articles/JsonPath/&lt;/a&gt;&lt;br /&gt;
+The Request body must contain requestInfo and masterDataCriteria, where in we need to mention tenantId and moduleDetails. moduleDetails must contain moduleName and masterDetails. Master Details must contain name and filter.
+For more information, have a look on swagger.{: .text-justify}
+&lt;a href=&quot;https://raw.githubusercontent.com/egovernments/egov-services/master/docs/mdms/contract/v1-0-0.yml&quot; class=&quot;btn btn--primary&quot;&gt;https://raw.githubusercontent.com/egovernments/egov-services/master/docs/mdms/contract/v1-0-0.yml&lt;/a&gt;&lt;br /&gt;
+Example :&lt;/p&gt;
+&lt;pre&gt;
+{
+&quot;RequestInfo&quot;:{
+    &quot;action&quot;:&quot;action&quot;,
+    &quot;did&quot;:&quot;did&quot;,
+    &quot;msgId&quot;: &quot;msgId&quot;,
+    &quot;requesterId&quot;:&quot;reuesterId&quot;,
+    &quot;authToken&quot;:&quot;296e6d21-66f9-45c8-a24f-f51d65243ebd&quot;,
+    &quot;apiId&quot;: &quot;123456789&quot;,
+    &quot;ver&quot;: &quot;159&quot;,
+    &quot;ts&quot;: null,
+    &quot;key&quot;: &quot;key&quot;,
+    &quot;tenantId&quot;: &quot;default&quot;
+  },
+&quot;MdmsCriteria&quot;: {
+    &quot;tenantId&quot;: &quot;default&quot;,
+
+    &quot;moduleDetails&quot;: [
+      {
+        &quot;moduleName&quot;: &quot;works&quot;,
+        &quot;masterDetails&quot;: [
+          {
+            &quot;name&quot;: &quot;WorksStatus&quot;,
+            &quot;filter&quot;: null
+          }
+        ]
+      }
+    ]
+  }
+}
+
+
+Response will be in the form of :
+{
+  &quot;ResponseInfo&quot;: null,
+  &quot;MdmsRes&quot;: {
+    &quot;moduleName&quot;: {
+      &quot;masterName&quot;: [
+        {
+          &quot;masterData&quot;: &quot;Master data&quot;
+        }
+      ]
+    }
+  }
+}
+
+&lt;/pre&gt;
+
+&lt;li&gt;MDMS get:&lt;/li&gt;
+&lt;p&gt;If we have filter [?(@.id==1||@.id==2)], filter value should be url-encoded. The URL finally looks like : &lt;a&gt;http://localhost:8093/egov-mdms-service/v1/_get?moduleName=SWM&amp;amp;masterName=&lt;br /&gt;CollectionPoint&amp;amp;tenantId=mh&amp;amp;filter=%5B%3F%28%40.id%3D%3D1%7C%7C%40.id%3D%3D2%29%5D&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;MDMS get is same as MDMS search. Only the difference is, instead of sending the required master data details in body, we will send in the form of query parameter.&lt;/p&gt;
+
+&lt;p&gt;Configurations to get MDMS enabled
+	By default the master file location is set to the path mentioned in Organization of MDMS Data section in mdms repository. If we want to modify it, then we need to change the configuration in application.properties file with key as egov.mdms.conf.path. Only if we modify in master-config.json, the build and deploy is required.&lt;/p&gt;
+
+&lt;p&gt;&lt;b&gt;Getting a new Master Data enabled for MDMS&lt;/b&gt;&lt;/p&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;To enable new module in mdms, we need to commit the folder manually in the repository in the specified location with name same as module name and configure masters config details in master-config file and create masters using create API.
+Example:
+Let us create a master data for new module, Asset. We need to create the folder with name Asset(Module name), in mh folder(tenant folder) in cloned location of egov-mdms-data repository in our system. We need to add master data configurations in master-config.json file. After adding configuration, the mdms create service needs to  build and deploy via  jenkins. After deploying the service, hit create api with master data details. Otherwise, we can add data manually in local pulled file and commit it to git, and call reload api to refresh the data map in mdms service(cached data).&lt;/p&gt;
+
+&lt;p&gt;Check out the &lt;a href=&quot;http://jekyllrb.com/docs/home&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most out of Jekyll. File all bugs/feature requests at &lt;a href=&quot;https://github.com/jekyll/jekyll&quot;&gt;Jekyll’s GitHub repo&lt;/a&gt;. If you have questions, you can ask them on &lt;a href=&quot;https://talk.jekyllrb.com/&quot;&gt;Jekyll Talk&lt;/a&gt;.&lt;/p&gt;
+
+</description>
+        <pubDate>Fri, 02 Feb 2018 14:00:04 +0530</pubDate>
+        <!-- <link>http://localhost:4000/mdms-create/2018/02/02/mdmscreate-document.html</link> -->
+        <guid isPermaLink="true">http://localhost:4000/mdms-create/2018/02/02/mdmscreate-document.html</guid>
+        
+        
+        <category>mdms-create</category>
+        
+      </item>
+    
+      <item>
+        <title>Master data management(MDMS)</title>
+        <description>&lt;p class=&quot;text-justify&quot;&gt;MDMS is a comprehensive method of enabling an enterprise to link all of its critical data to one place, called a master data, that provides a common point of reference. Master data is common data which will be added or modified once in a while in the system. To reduce the effort of creating API’s for master data maintenance for individual modules, MDMS is been introduced. MDMS provides common API’s for maintenance of all modules master data.&lt;/p&gt;
+
+&lt;h3&gt;&lt;b&gt;Data considered as master data&lt;/b&gt;&lt;/h3&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;Master data is the consistent and uniform set of identifiers and extended attributes that describes the core entities of the enterprise. The data which is consistent, non transactional and will be added or modified once in a while are considered to be a master data.&lt;/p&gt;
+&lt;p&gt;Example : Department.&lt;/p&gt;
+
+&lt;p&gt;Departments in an organization remains same throughout and added or modified rarely.&lt;/p&gt;
+&lt;pre&gt;
+{
+  &quot;tenantId&quot;: &quot;default&quot;,
+  &quot;moduleName&quot;: &quot;common-masters&quot;,
+  &quot;Department&quot;: [
+    {
+      &quot;id&quot;: &quot;1&quot;,
+      &quot;name&quot;: &quot;ADMINISTRATION&quot;,
+      &quot;code&quot;: &quot;ADM&quot;,
+      &quot;active&quot;: &quot;true&quot;,
+      &quot;tenantId&quot;: &quot;default&quot;
+    },{
+      &quot;active&quot;: &quot;true&quot;,
+      &quot;tenantId&quot;: &quot;default&quot;
+      &quot;id&quot;: &quot;2&quot;,
+      &quot;name&quot;: &quot;ACCOUNTS&quot;,
+      &quot;code&quot;: &quot;ACC&quot;,
+
+    },{
+      &quot;id&quot;: &quot;5&quot;,
+      &quot;name&quot;: &quot;ENGINEERING&quot;,
+      &quot;code&quot;: &quot;ENG&quot;,
+      &quot;active&quot;: &quot;true&quot;,
+      &quot;tenantId&quot;: &quot;default&quot;
+    },
+    {
+      &quot;id&quot;: &quot;7&quot;,
+      &quot;name&quot;: &quot;TOWN PLANNING&quot;,
+      &quot;code&quot;: &quot;TP&quot;,
+      &quot;active&quot;: &quot;true&quot;,
+      &quot;tenantId&quot;: &quot;default&quot;
+    }
+}
+&lt;/pre&gt;
+
+&lt;p&gt;Architecture of MDMS
+&lt;img src=&quot;/images/mdms arch.png&quot; alt=&quot;mdms architecture&quot; class=&quot;img-responsive&quot; /&gt;&lt;/p&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;Organization of MDMS Data:
+MDMS stores master data in json file. The folder structure of a GIT is as follows :
+Repository where Master data is stored is egov-mdms-data.
+Under egov-mdms-data repository, there is a data folder.
+Under data folder, there will be a folder with state level tenant name ex:  “mh”, where Maharastra specific statewide master data will be published.
+Under state level tenant folder, there will be “tenant” folders where ulb specific master data will be checked in. for example “mh.roha”
+Each module will have one folder for statewide and ulb wide master data. The folder name should be same as module name.
+Under the modules, individual master data is stored in individual json file. The file name should be same as master name.&lt;/p&gt;
+&lt;p&gt;Note- Be very sure of what we are keeping as master data. No transaction data should be added here.&lt;/p&gt;
+
+&lt;p&gt;API’s available in MDMS are as follows:
+MDMS create/update
+&lt;a href=&quot;#&quot; class=&quot;btn btn--primary&quot;&gt;http://egov-micro-dev.egovernments.org/egov-mdms-create/v1/_create&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&quot;#&quot; class=&quot;btn btn--primary&quot;&gt;http://egov-micro-dev.egovernments.org/egov-mdms-create/v1/_update&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Payload for both create and update should have Requestinfo and MasterMetaData, under which tenantId, moduleName and masterName and masterData should be present.&lt;/p&gt;
+
+&lt;p&gt;Format of request:&lt;/p&gt;
+&lt;pre&gt;
+{
+“RequestInfo”: {}
+&quot;MasterMetaData&quot;: {
+    &quot;masterData&quot;: List of master data,
+    &quot;tenantId&quot;: &quot;Tenant id&quot;,
+    &quot;moduleName&quot;: &quot;Module name&quot;,
+    &quot;masterName&quot;: &quot;Master name&quot;
+  }
+}
+&lt;/pre&gt;
+&lt;p&gt;for more information, have a look on swagger. https://raw.githubusercontent.com/egovernments/egov-services/master/docs/mdms/contract/mdms-create-v1-0-0.yml
+Example :&lt;/p&gt;
+&lt;pre&gt;
+{
+  &quot;MasterMetaData&quot;: {
+    &quot;masterData&quot;: [
+      {
+        &quot;tenantId&quot;: &quot;default&quot;,
+        &quot;id&quot;: &quot;14&quot;,
+        &quot;name&quot;: &quot;Water Ways&quot;,
+        &quot;code&quot;: &quot;014&quot;
+      }
+    ],
+    &quot;tenantId&quot;: &quot;default&quot;,
+    &quot;moduleName&quot;: &quot;ASSET&quot;,
+    &quot;masterName&quot;: &quot;AssetCategory&quot;
+  },
+  &quot;RequestInfo&quot;: {
+    &quot;apiId&quot;: &quot;org.egov.pt&quot;,
+    &quot;ver&quot;: &quot;1.0&quot;,
+    &quot;ts&quot;: 1513338399194,
+    &quot;action&quot;: &quot;asd&quot;,
+    &quot;did&quot;: &quot;4354648646&quot;,
+    &quot;key&quot;: &quot;xyz&quot;,
+    &quot;msgId&quot;: &quot;654654&quot;,
+    &quot;requesterId&quot;: &quot;61&quot;,
+    &quot;authToken&quot;: &quot;6bcde78c-2ef8-453c-a2ac-16c44fded416&quot;
+  }
+}
+&lt;/pre&gt;
+&lt;p&gt;Example:&lt;/p&gt;
+
+&lt;p&gt;Note: For MDMS create or update unique or primary key constraints needs to be configured in master-config.json in MDMS create service resources folder.&lt;/p&gt;
+&lt;pre&gt;
+{
+  &quot;ASSET&quot;: {
+    &quot;AssetCategory&quot;: {
+      &quot;masterName&quot;: &quot;AssetCategory&quot;,
+      &quot;moduleDefinition&quot;: null,
+      &quot;isStateLevel&quot;: true,
+      &quot;uniqueKeys&quot;: [
+        &quot;$.id&quot;,
+        &quot;$.tenantId&quot;
+      ]
+    }
+  }
+}
+&lt;/pre&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;When we hit create request, the mdms-create service will go through master-config.json, validates the request against the configuration. If validation holds good then it will insert a requested record in the specified master file. If the Master file does not exist and corresponding configuration is present in master-config file, then it will create the file with the requested data. The application will give the exception, if there is no master configuration in master-config.json file related to requested master, even if the master file exists in the repository.
+For update, the data is updated on the bases of configurations (unique key/primary key constraints) in master-config.json.
+If we modify the master-config.json file or any other config file, then respective services must build and deployed for reflecting modifications.
+When we build and deploy the service, the application will loads up all our configurations from config files in a map. Whenever the application needs configs, it will get it done from the map.&lt;/p&gt;
+
+&lt;p&gt;MDMS Search:
+http://egov-micro-dev.egovernments.org/egov-mdms-service/v1/_search
+MDMS search API provides to get the data from the master data. It also provides an attribute called filter, where in we can provide filter expressions. Based on filter expression, search API will filter the data and provide the response. Example:
+[?(@.id==1||@.id==2)] This expression will filter the master data by id equals to 1 or 2.
+[?( @.id == 10 &amp;amp;&amp;amp; @.tenantId ==’default’)] This expression will filter the master data by id equals to 10 and tenantId=default.
+For more information on filter expression please go through http://goessner.net/articles/JsonPath/
+The Request body must contain requestInfo and masterDataCriteria, where in we need to mention tenantId and moduleDetails. moduleDetails must contain moduleName and masterDetails. Master Details must contain name and filter.
+For more information, have a look on swagger.{: .text-justify}
+https://raw.githubusercontent.com/egovernments/egov-services/master/docs/mdms/contract/v1-0-0.yml
+Example :&lt;/p&gt;
+&lt;pre&gt;
+{
+&quot;RequestInfo&quot;:{
+    &quot;action&quot;:&quot;action&quot;,
+    &quot;did&quot;:&quot;did&quot;,
+    &quot;msgId&quot;: &quot;msgId&quot;,
+    &quot;requesterId&quot;:&quot;reuesterId&quot;,
+    &quot;authToken&quot;:&quot;296e6d21-66f9-45c8-a24f-f51d65243ebd&quot;,
+    &quot;apiId&quot;: &quot;123456789&quot;,
+    &quot;ver&quot;: &quot;159&quot;,
+    &quot;ts&quot;: null,
+    &quot;key&quot;: &quot;key&quot;,
+    &quot;tenantId&quot;: &quot;default&quot;
+  },
+&quot;MdmsCriteria&quot;: {
+    &quot;tenantId&quot;: &quot;default&quot;,
+
+    &quot;moduleDetails&quot;: [
+      {
+        &quot;moduleName&quot;: &quot;works&quot;,
+        &quot;masterDetails&quot;: [
+          {
+            &quot;name&quot;: &quot;WorksStatus&quot;,
+            &quot;filter&quot;: null
+          }
+        ]
+      }
+    ]
+  }
+}
+
+
+Response will be in the form of :
+{
+  &quot;ResponseInfo&quot;: null,
+  &quot;MdmsRes&quot;: {
+    &quot;moduleName&quot;: {
+      &quot;masterName&quot;: [
+        {
+          &quot;masterData&quot;: &quot;Master data&quot;
+        }
+      ]
+    }
+  }
+}
+
+&lt;/pre&gt;
+
+&lt;p&gt;MDMS get:
+If we have filter [?(@.id==1||@.id==2)], filter value should be url-encoded. The URL finally looks like : &lt;a&gt;http://localhost:8093/egov-mdms-service/v1/_get?moduleName=SWM&amp;amp;masterName=&lt;br /&gt;CollectionPoint&amp;amp;tenantId=mh&amp;amp;filter=%5B%3F%28%40.id%3D%3D1%7C%7C%40.id%3D%3D2%29%5D&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;MDMS get is same as MDMS search. Only the difference is, instead of sending the required master data details in body, we will send in the form of query parameter.&lt;/p&gt;
+
+&lt;p&gt;Configurations to get MDMS enabled
+	By default the master file location is set to the path mentioned in Organization of MDMS Data section in mdms repository. If we want to modify it, then we need to change the configuration in application.properties file with key as egov.mdms.conf.path. Only if we modify in master-config.json, the build and deploy is required.&lt;/p&gt;
+
+&lt;p&gt;Getting a new Master Data enabled for MDMS&lt;/p&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;To enable new module in mdms, we need to commit the folder manually in the repository in the specified location with name same as module name and configure masters config details in master-config file and create masters using create API.
+Example:
+Let us create a master data for new module, Asset. We need to create the folder with name Asset(Module name), in mh folder(tenant folder) in cloned location of egov-mdms-data repository in our system. We need to add master data configurations in master-config.json file. After adding configuration, the mdms create service needs to  build and deploy via  jenkins. After deploying the service, hit create api with master data details. Otherwise, we can add data manually in local pulled file and commit it to git, and call reload api to refresh the data map in mdms service(cached data).&lt;/p&gt;
+
+&lt;p&gt;Check out the &lt;a href=&quot;http://jekyllrb.com/docs/home&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most out of Jekyll. File all bugs/feature requests at &lt;a href=&quot;https://github.com/jekyll/jekyll&quot;&gt;Jekyll’s GitHub repo&lt;/a&gt;. If you have questions, you can ask them on &lt;a href=&quot;https://talk.jekyllrb.com/&quot;&gt;Jekyll Talk&lt;/a&gt;.&lt;/p&gt;
+
+</description>
+        <pubDate>Fri, 02 Feb 2018 14:00:04 +0530</pubDate>
+        <!-- <link>http://localhost:4000/mdms/2018/02/02/mdms-document.html</link> -->
+        <guid isPermaLink="true">http://localhost:4000/mdms/2018/02/02/mdms-document.html</guid>
+        
+        
+        <category>mdms</category>
+        
+      </item>
+    
+      <item>
+        <title>Persister</title>
+        <description>&lt;p&gt;&lt;b&gt;Persister service&lt;/b&gt;&lt;/p&gt;
+
+&lt;p&gt;The eGov Persistor Service allows third party developers to persist data against a backend data store through a set of configurations. Using the persistor service allows configuration of details like the data store to be configured and written on the persistor service without the need to make this change at the individual modules.&lt;br /&gt;
+The configurations of persistor allows for the following&lt;/p&gt;
+&lt;li&gt;Mapping of the object attributes with the attributes of the persisted object.&lt;/li&gt;
+&lt;li class=&quot;text-justify&quot;&gt;Query configurations&lt;/li&gt;
+&lt;p&gt;&lt;b&gt;Architecture of Persister&lt;/b&gt;
+&lt;img src=&quot;/images/persister.png&quot; alt=&quot;mdms architecture&quot; class=&quot;img-responsive&quot; /&gt;&lt;/p&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;Persister service is a common component, which will pick the request from KAFKA queue based on configured topic names in yml configuration, process the request, prepares queries and run queries to persist the data. The yml configuration file path, which is configured in the persister application.properties file are loaded in the application cache memory at the time of deployment of the application.&lt;/p&gt;
+&lt;p&gt;&lt;b&gt;Persister yml configurations structure&lt;/b&gt;&lt;/p&gt;
+&lt;pre&gt;
+The eGov Indexer provides following configurations:
+mappings: List of mappings between topic name and respective configurations.
+fromTopic: The topic on which the input json will be received, This will be the parent topic for the list of persister configs.
+queryMaps: It will have a list of queries and respective json mappings configurations.
+query: query, which is to be executed to persist the data in database.
+jsonMaps: It is a collection of json paths for mapping json data to query placeholder.
+jsonPath: The json path to be configured to map data to the query placeholder.
+
+serviceMaps:
+ serviceName: User Service
+ mappings:
+ - version: 1.0
+   name: Module name
+   description: Description
+   fromTopic: save-asset-maha (unique Topic)
+   isTransaction: true
+   queryMaps:
+    - query: Insert/Update query (eg: INSERT INTO egasset_asset( id, name, code, departmentcode, assetcategory)VALUES (?, ?, ?, ?, ?);)
+
+      basePath: Asset
+      jsonMaps:
+       - jsonPath: $.Asset.id
+       - jsonPath: $.Asset.name
+       - jsonPath: $.Asset.code
+       - jsonPath: $.Asset.department.code
+       - jsonPath: $.Asset.assetCategory.id
+&lt;/pre&gt;
+&lt;p&gt;For more information on json path refer http://goessner.net/articles/JsonPath/&lt;/p&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;&lt;b&gt;Artifacts&lt;/b&gt;&lt;br /&gt;
+The configurations for persister to persist the data is done through  yml configurations. Each new business application would need an accompanying persistor yml file. The location of the yml file is configured in the application.properties of the persistor service. It is recommended that the yml configuration file  be placed under individual module code base under a  persister folder.
+The conventions to be followed for placing the yml configuration are&lt;/p&gt;
+&lt;li&gt;Create config folder in the application.&lt;/li&gt;
+&lt;li&gt;Create persister folder in config.&lt;/li&gt;
+&lt;li&gt;Create the yml file in persister and write the configurations as mentioned in Persister yml configurations structure section.&lt;/li&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;&lt;b&gt;Configurations&lt;/b&gt;&lt;br /&gt;
+Add the module specific configuration location path in the application.properties of the Persistor Service [TODO -&amp;gt; Need to fix a process for making this change…..]
+To make persister identify this config file, we should configure the raw url of the config yml file in persister service application.properties file, with key egov.persist.yml.repo.path. Egov.persist.yml.repo.path will have comma separated raw urls of yml config files.&lt;/p&gt;
+&lt;p&gt;&lt;b&gt;Example:&lt;/b&gt;
+egov.persist.yml.repo.path=https://raw.githubusercontent.com/egovernments/egov-services/master/docs/persist-infra/configuration-yaml/swm-service-persist.yaml,&lt;b&gt;https://raw.githubusercontent.com/egovernments/egov-services/master/asset/config/persister/asset-services-maha.yml&lt;/b&gt;&lt;br /&gt;
+The highlighted path is an example of how configuration for a new module can be added
+Create the module specific configuration file [Need instructions for creating the new configuration file&lt;/p&gt;
+
+&lt;p&gt;Note: After all configurations build and deploy both persister and respective integrated service through jenkins.&lt;/p&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;&lt;b&gt;Calling Persister&lt;/b&gt;&lt;br /&gt;
+Persister works on an asynchronous mode, that allows individual applications to write the object to be persisted in the Kafka queue under a topic name that is configured in the application specific yaml configuration. The steps for using Persistor are mentioned below&lt;/p&gt;
+&lt;h4&gt;Business Application Responsibility&lt;/h4&gt;
+&lt;li&gt;Business Application performs the required business validations and process&lt;/li&gt;
+&lt;li&gt;Creates the model object to be persisted&lt;/li&gt;
+&lt;li&gt;Pushes the model object to the Kafka queue with the topic name configured in the Persistor YML configuration under the key [KEY_NAME]&lt;/li&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h4&gt;Persistor Responsibility&lt;/h4&gt;
+&lt;p class=&quot;text-justify&quot;&gt;Persistor service is listening to the Kafka queue for objects published under the topic configured in the Persistor YML configuration under the key [KEY_NAME].
+Persistor picks up the object and uses the following configurations to persist the data&lt;/p&gt;
+&lt;li&gt;Key 1 - &amp;gt; Used to pick up the query&lt;/li&gt;
+&lt;li&gt;Key 2 -&amp;gt; Used to map the business object to the data store object&lt;/li&gt;
+&lt;p&gt;Calling persister is similar to handovering request from service to repository through KAFKA. When a create or update endpoint is called, the request is picked by the respective controller, from controller to the service. In service after business logic the request is sent in the queue, with some topic using kafkaTemplate.send() method. The same topic will be configured in persister yml configuration. The persister consumer will be listening for the specific topic. Once the topic is found, the persister will process the respective configurations(query and data binding is done based on json paths configured) corresponding to the sent topic and will be executed.
+&lt;br /&gt;&lt;b&gt;Example:&lt;/b&gt;&lt;br /&gt;
+logAwareKafkaTemplate.send(“save-asset-maha”,”save-asset-maha-key”,assetRequest); -&amp;gt; posts the asset business object under the topic “save-asset-maha” with the key “save-asset-maha-key” [What is a key]&lt;/p&gt;
+
+&lt;p&gt;&lt;b&gt;Testing Persister&lt;/b&gt;&lt;/p&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;Persister can be tested by initiating a create api from postman, with respective request, which is configured in persister for create. If validation and business logic executes successfully, the request is sent to kafka queue with unique topic name. After placing the request in to kafka queue, the api will give the response back with successful status and sequence generated ids or code(Unique key).
+Initiate Search api with ids or codes as request params, which we got from create response. It should return the same json object as we got in create api response, which means persister is working fine.&lt;/p&gt;
+
+&lt;p&gt;Check out the &lt;a href=&quot;http://jekyllrb.com/docs/home&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most out of Jekyll. File all bugs/feature requests at &lt;a href=&quot;https://github.com/jekyll/jekyll&quot;&gt;Jekyll’s GitHub repo&lt;/a&gt;. If you have questions, you can ask them on &lt;a href=&quot;https://talk.jekyllrb.com/&quot;&gt;Jekyll Talk&lt;/a&gt;.&lt;/p&gt;
+
+</description>
+        <pubDate>Fri, 02 Feb 2018 14:00:04 +0530</pubDate>
+        <!-- <link>http://localhost:4000/persister/2018/02/02/Persister-document.html</link> -->
+        <guid isPermaLink="true">http://localhost:4000/persister/2018/02/02/Persister-document.html</guid>
+        
+        
+        <category>persister</category>
+        
+      </item>
+    
+      <item>
+        <title>Indexer service</title>
+        <description>&lt;p&gt;&lt;b&gt;Indexer&lt;/b&gt;&lt;/p&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;The eGov Indexer allows third party developers to index data through a set of configurations. The service allows configuration of details like the data to be configured and written on the indexer service without the need to create indexer components for individual modules. The service is designed to perform all the indexing tasks of the egov platform. The service reads records posted on specific kafka topics and picks the corresponding index configuration from the yaml file provided by the respective module.&lt;/p&gt;
+&lt;p class=&quot;text-justify&quot;&gt;The configurations of indexer allows for the following
+Multiple indexes of a record posted on a single topic.
+Provision for custom index id.
+Performs both bulk and non-bulk indexing.
+Supports custom json indexing with field mappings, Enrichment of the input object on the queue.
+Performs Elastic Search down handling.&lt;/p&gt;
+&lt;p&gt;&lt;b&gt;Architecture of Indexer&lt;/b&gt;
+&lt;img src=&quot;/images/Indexer arch.png&quot; alt=&quot;mdms architecture&quot; class=&quot;img-responsive&quot; /&gt;&lt;/p&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;Indexer service is a common component, which will pick the request from KAFKA queue based on configured topic names in yml configuration, and process the request against yml configurations, if the uriMapping is configured, then the indexer calls the specified api with configured details. Once the indexer receives the response, it will map the response data to json, which is specified in index mapping and index the json data. The Indexer service will pull all configurations from git, which are specified in the path, and store in cache on loading the service.&lt;/p&gt;
+&lt;p&gt;&lt;b&gt;Indexer yml configuration structure&lt;/b&gt;&lt;/p&gt;
+&lt;pre&gt;
+  &lt;b&gt;The eGov Indexer provides following configurations:&lt;/b&gt;&lt;br /&gt;
+&lt;b&gt; - mappings:&lt;/b&gt; List of mappings between topic name and respective index configurations.&lt;br /&gt;
+&lt;b&gt; - topic:&lt;/b&gt; The topic on which the input json will be received, This will be the parent topic for the list of index configs.&lt;br /&gt;
+&lt;b&gt; - indexes:&lt;/b&gt; List of index configuration to be applied on the input json received on the parent topic.&lt;br /&gt;
+&lt;b&gt; - name:&lt;/b&gt; name of the index.&lt;br /&gt;
+&lt;b&gt; - type:&lt;/b&gt; document type.&lt;br /&gt;
+&lt;b&gt; - id:&lt;/b&gt; Json path of the id to be used as index id while indexing. This takes comma separated Json paths to build custom index id. Values will be fetched from the json path and concatenated to form the indexId.&lt;br /&gt;
+&lt;b&gt; - isBulk:&lt;/b&gt; boolean value to signify if the input is a json array or json object, true in the first case, false otherwise.&lt;br /&gt; &lt;b&gt;Note:&lt;/b&gt; if isBulk = true, indexer will accept only array of json objects as input.&lt;br /&gt;
+&lt;b&gt; - jsonPath:&lt;/b&gt; Json Node path in case just a piece of the input json is to be indexed.&lt;br /&gt;
+&lt;b&gt; - customJsonMapping:&lt;/b&gt; Set of mappings for building an entirely new json object to index onto ES.&lt;br /&gt;
+&lt;b&gt; - indexMapping:&lt;/b&gt; Sample output json which will get indexed on to ES. This has to be provided by the respective module, if not provided, framework will fetch it from the ES. It is recommended to provide this.&lt;br /&gt;
+&lt;b&gt; - fieldMapping:&lt;/b&gt; This is a list of mappings between fields of input and output json namely: inJsonPath and outJsonPath. It takes inJsonPath value from input json and puts it to outJsonPath field of output json.
+&lt;b&gt; - uriMapping:&lt;/b&gt; This takes uri, queryParam, pathParam and apiRequest as to first build the uri and hit the service to get the response and then takes a list of fieldMappings as above to map fields of the api response to the fields of output json.
+
+ &lt;b&gt;Note:&lt;/b&gt; &quot;$&quot; is to be specified as place holder in the uri path wherever the pathParam is to be substituted in order. queryParams should be comma separated.
+&lt;/pre&gt;
+&lt;p&gt;&lt;b&gt;Example:&lt;/b&gt;&lt;/p&gt;
+&lt;pre&gt;
+ServiceMaps:
+ serviceName: Water Charges (Module name)
+ version: 1.0.0
+ mappings:
+  - topic: egov.wcms.newconnection-create (KAFKA topic)
+    indexes:
+    - name: watercharges	 (Indexer name)
+      type: consumerdetails 	 (Indexer type)
+      id: $.Connection.id,$.Connection.tenantId (The data is indexed based on this id. If it is not provided then the indexer will create one id and index the data)
+      isBulk: false
+      jsonPath: (If part of data is to be indexed then configure details below in custom json mapping)
+      customJsonMapping:
+        indexMapping: {&quot;ConnectionIndex&quot;:{&quot;ConnectionDetailsEs&quot;:{&quot;id&quot;:13567,&quot;connectionType&quot;:&quot;PERMANENT&quot;,&quot;applicationType&quot;:&quot;NEWCONNECTION&quot;,&quot;hscPipeSizeType&quot;:19.05,&quot;pipesizeId&quot;:18,&quot;executionDate&quot;:null,&quot;supplyType&quot;:&quot;SemiBulkType&quot;,&quot;noOfFlats&quot;:0,&quot;supplyTypeId&quot;:11}}} 	(Sample Json, in which data is mapped from json paths configured below)
+        fieldMapping:
+        - inJsonPath: $.Connection.supplyType (Input json path)
+          outJsonPath: $.ConnectionIndex.ConnectionDetailsEs.supplyType (data mapping from input json to sample json)
+        - inJsonPath: $.Connection.hscPipeSizeType
+          outJsonPath: $.ConnectionIndex.ConnectionDetailsEs.hscPipeSizeType
+ uriMapping: (to be configured If the data which is to be indexed, is to get from any other api)
+     - path: http://hr-employee:8080/hr-employee/employees/73/positions/_search (api from which data is to be fetched)
+       queryParam: tenantId = $.Connection.tenantId (Comma separated query params)
+       pathParam: $.Connection.id (comma separated path params)
+       apiRequest: {&quot;RequestInfo&quot;: {&quot;apiId&quot;: &quot;org.egov.pt&quot;,&quot;ver&quot;: &quot;1.0&quot;,&quot;ts&quot;: 1502890899493,&quot;action&quot;: &quot;asd&quot;,&quot;did&quot;: &quot;4354648646&quot;,&quot;key&quot;: &quot;xyz&quot;,&quot;msgId&quot;: &quot;654654&quot;, &quot;requesterId&quot;: &quot;61&quot;,
+       &quot;authToken&quot;: &quot;750d4aa9-2436-4bc4-a8f4-3796e3bfd465&quot;,&quot;userInfo&quot;:{&quot;id&quot;:73}}}(Sample api request body)
+       uriResponseMapping:		(Response mapping)
+       - inJsonPath: $.Position[0].id	(From path)
+         outJsonPath: $.ConnectionIndex.ConnectionDetailsEs.hscPipeSizeType (To path)
+       - inJsonPath: $.Position[0].deptdesig.designation.name
+         outJsonPath: $.ConnectionIndex.ConnectionDetailsEs.connectionType
+&lt;/pre&gt;
+
+&lt;p&gt;&lt;b&gt;Configurations&lt;/b&gt;&lt;/p&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;Add the module specific configuration location path in the application.properties of the Indexer Service. The Indexer service will pull all configurations from git, which are specified in the path, and store in cache on loading the service. So after all configurations build and deploy Indexer service through jenkins.&lt;/p&gt;
+&lt;p&gt;&lt;b&gt;Example:&lt;/b&gt;&lt;/p&gt;
+
+&lt;p&gt;egov.indexer.yml.repo.path=https://raw.githubusercontent.com/egovernments/egov-services/master/core/egov-indexer/src/main/resources/swm-service-indexer.yml,https://raw.githubusercontent.com/egovernments/egov-services/master/core/egov-indexer/src/main/resources/watercharges-indexer.yml
+The highlighted path is an example of how configuration for a new module can be added&lt;/p&gt;
+
+&lt;p&gt;&lt;b&gt;Calling Indexer component&lt;/b&gt;&lt;/p&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;Indexer service works on an asynchronous mode, that allows individual applications to write the object to be indexed in the Kafka queue under a topic name that is configured in the application specific yaml configuration. The steps for using Indexer are mentioned below&lt;/p&gt;
+&lt;p&gt;Business Application Responsibility
+Business Application performs the required business validations and process
+Creates the model object to be indexed.
+Pushes the model object to the Kafka queue with the topic name configured in the Indexer yml configuration under the key [KEY_NAME]&lt;/p&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;Indexer Responsibility
+Indexer service will be listening to the Kafka queue for objects published under the topic configured in the indexer yml configuration under the key [KEY_NAME]
+Indexer picks up the object and uses the following configurations to to process the data and index.&lt;/p&gt;
+&lt;p class=&quot;text-justify&quot;&gt;As both Persister and Indexer services are maid to store the data, If there is a requirement to store the data both in database as well as in indexer. In that case we can configure the same topic in both services, so that both will be listening to the same topic, once they will find the topic, both services start doing their respective tasks.&lt;/p&gt;
+&lt;p&gt;&lt;b&gt;Testing Indexer component&lt;/b&gt;&lt;/p&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;Indexer can be tested by initiating a create api from postman, with respective request, which is configured in indexer for create. If validation and business logic executes successfully, the request is sent to kafka queue with unique topic name. After placing the request in to kafka queue, the api will give the response back with successful status and sequence generated ids or code(Unique key).&lt;/p&gt;
+</description>
+        <pubDate>Thu, 01 Feb 2018 14:00:04 +0530</pubDate>
+        <!-- <link>http://localhost:4000/indexer/2018/02/01/Indexer-Service.html</link> -->
+        <guid isPermaLink="true">http://localhost:4000/indexer/2018/02/01/Indexer-Service.html</guid>
+        
+        
+        <category>indexer</category>
+        
+      </item>
+    
+  </channel>
+</rss>

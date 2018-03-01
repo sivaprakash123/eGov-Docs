@@ -1,0 +1,9 @@
+def build(path, ci_image) {
+    stage("Build") {
+        docker.image("egovio/ci-jekyll:v1.0").inside {
+            sh "cd ${path}";
+        }
+    }
+}
+
+return this;

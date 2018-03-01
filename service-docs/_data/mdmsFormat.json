@@ -1,0 +1,9 @@
+{
+"RequestInfo": null,
+"MasterMetaData" : {
+    "masterData": "List of master data",
+    "tenantId": "Tenant id",
+    "moduleName": "Module name",
+    "masterName": "Master name"
+  }
+}

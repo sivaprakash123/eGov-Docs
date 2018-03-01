@@ -1,0 +1,87 @@
+<p><b>Persister service</b></p>
+
+<p class="text-justify">The eGov Persistor Service allows third party developers to persist data against a backend data store through a set of configurations defined at an individual business module level. Any data persistence errors or exceptions are logged on the Error Queue (a Kafka queue) to enable Application Monitoring at the platform level. Individual business modules can also subscribe to these errors to perform business module specific error handling.<br /></p>
+<p><b>Architecture</b>
+<img src="/images/persister.png" alt="mdms architecture" class="img-responsive" /></p>
+
+<p class="text-justify">Persistor service listens to the configured Kafka topics, processes the records against the business module specific yaml configuration, and persists data against a configured data store. Each new business application would need an accompanying persistor yml file. The location of the yml file is configured in the application.properties of the persistor service with the key egov.persist.yml.repo.path. Egov.persist.yml.repo.path will have comma separated raw urls of yml config files for all modules. It is recommended that the yml configuration file  be placed under individual module code base under a  persister folder.</p>
+<p><b>Configurations</b><br />
+Each module specific yaml configuration needs to be of the following format.<br /></p>
+
+<pre class="text-justify">
+serviceMaps:
+ serviceName: [SERVICE_NAME]
+ mappings:
+ - version: 1.0
+   name: [MODULE_NAME]
+   description: [DESCRIPTION]
+   fromTopic: [TOPIC_NAME]
+   isTransaction: [true/false]
+   queryMaps:
+    - query: [QUERY]
+      basePath: [BASE_PATH_OF_MESSAGE]
+      jsonMaps:
+
+       - jsonPath: [PATH_TO_MAP_QUERY_PARAM_1]
+
+       - jsonPath: [PATH_TO_MAP_QUERY_PARAM_2]
+
+       - jsonPath: [PATH_TO_MAP_QUERY_PARAM_3]
+</pre>
+<p>Where</p>
+<li>[SERVICE_NAME] is the name of the service</li>
+<li>[MODULE_NAME] is to be replaced with the module name</li>
+<li>[DESCRIPTION] is a short description of what the query does</li>
+<li>[TOPIC_NAME] is the name of the topic to listen to</li>
+<li>[QUERY] is the query to be configured along with the query parameters</li>
+<li>[BASE_PATH_OF_MESSAGE] is the base path to use for the json paths</li>
+<li class="text-justify">[PATH_TO_MAP_QUERY_PARAM_1],[PATH_TO_MAP_QUERY_PARAM_2],
+[PATH_TO_MAP_QUERY_PARAM_3] are the fully qualified json paths</li>
+
+<p>Example:</p>
+<pre>
+serviceMaps:
+ serviceName: User Service
+ mappings:
+ - version: 1.0
+   name: Module name
+   description: Description
+   fromTopic: save-asset-maha (unique Topic)
+   isTransaction: true
+   queryMaps:
+    - query: Insert/Update query (eg: INSERT INTO egasset_asset( id, name, code, departmentcode, assetcategory)VALUES (?, ?, ?, ?, ?);)
+
+      basePath: Asset
+      jsonMaps:
+       - jsonPath: $.Asset.id
+       - jsonPath: $.Asset.name
+       - jsonPath: $.Asset.code
+       - jsonPath: $.Asset.department.code
+       - jsonPath: $.Asset.assetCategory.id
+       </pre>
+
+<p><b>Usage</b><br />   <br />
+      Persister works on an asynchronous mode, that allows individual applications to write the object to be persisted in the Kafka queue under a topic name that is configured in the business module specific yaml configuration. The steps for using Persistor are mentioned below:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  Business Application Responsibility
+
+  &lt;li&gt;Business Application performs the required business validations and process&lt;/li&gt;
+  &lt;li&gt;Creates the model object to be persisted&lt;/li&gt;
+  &lt;li&gt;Pushes the model object to the Kafka queue with the topic name configured in the Persistor YML configuration under the key fromTopic&lt;/li&gt;
+
+  Persistor Responsibility
+
+  &lt;li&gt;Persistor service listens to the Kafka queue for objects published under the topic configured in the Persistor YML configuration under the key fromTopic&lt;/li&gt;
+  &lt;li&gt;Persistor picks up the object and uses the yaml configuration to persist the data&lt;/li&gt;
+
+ Configuration for a new module.
+
+ Configuring a new module to be used by Persistor involves the following
+
+&lt;li&gt;Append the module config file to the Persistor Application.Properties&lt;/li&gt;
+&lt;li&gt; Write the module config file as explained in the Configuration section&lt;/li&gt;
+&lt;li&gt;Restart the Persistor service to reload the configurations&lt;/li&gt;
+</code></pre></div></div>
+
+<p>Check out the <a href="http://jekyllrb.com/docs/home">Jekyll docs</a> for more info on how to get the most out of Jekyll. File all bugs/feature requests at <a href="https://github.com/jekyll/jekyll">Jekyll’s GitHub repo</a>. If you have questions, you can ask them on <a href="https://talk.jekyllrb.com/">Jekyll Talk</a>.</p>
+

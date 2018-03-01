@@ -1,0 +1,168 @@
+	<div id="">
+	{% if site.showSearch == true %}
+		{% include search.html %}
+	{% endif %}
+	<div class="sidebar-wrapper {{page.directory | slugify}}">
+		<div class="" >
+		 <a href="aboutdigit/" >
+				<h4 class="sidebar-group-title" >About digit</h4>
+			</a>
+			<ul class="sidebar-group aboutdigit">
+				<li>
+					<a href="/aboutdigit/overview/">Overview</a>
+				</li>
+				<li>
+					<a href="/aboutdigit/philosophy/">Philosophy</a>
+				</li>
+				<li>
+					<a href="/aboutdigit/whatsnew/">Whats New</a>
+				</li>
+     </ul>
+
+		 <a href="architecture/">
+		 	<h4 class="sidebar-group-title">Architecture</h4>
+		 </a>
+
+		 <ul class="sidebar-group architecture">
+		 	<li>
+		 		<a href="/architecture/overview/">Overview</a>
+		 	</li>
+		 	<li>
+		 		<a href="/architecture/design/">Design</a>
+		 	</li>
+		 	<li>
+		 		<a href="/architecture/logicalview/">Logical view</a>
+		 	</li>
+		 <li>
+		 		<a href="/architecture/technicalview/">Technicl view</a>
+		 	</li>
+		 </ul>
+
+		 	<a href="apisandusage/">
+		 				<h4 class="sidebar-group-title" target="_blank">APIs and Usage</h4>
+		 			</a>
+		 			<ul class="sidebar-group apisandusage" target="_blank">
+		 				<li>
+		 					<a href="/apisandusage/userservice/" target="_blank">User Service</a>
+		 				</li>
+		 				<li>
+		 					<a href="/apisandusage/useroTPservice/" target="_blank">User OTP Service</a>
+		 				</li>
+		 				<li>
+		 					<a href="/apisandusage/employeeservice/" target="_blank">Employee Service</a>
+		 				</li>
+		 				<li>
+		 					<a href="/apisandusage/employeeassignment/" target="_blank">EmployeeAssignment</a>
+							<li>
+								<a href="/apisandusage/payments/" target="_blank">Payments</a>
+							</li>
+							<li>
+								<a href="/apisandusage/billing/" target="_blank">Billing</a>
+							</li>
+							<li>
+								<a href="/apisandusage/boundary/" target="_blank">Boundary</a>
+							</li>
+							<li>
+								<a href="/apisandusage/tenant/" target="_blank">Tenant</a>
+							</li>
+		 				</li>
+		 			</ul>
+
+					<a href="frameworkcomponents/">
+						<h4 class="sidebar-group-title">Framework Components</h4>
+					</a>
+					<ul class="sidebar-group frameworkcomponents">
+						<li>
+							<a href="/frameworkcomponents/mdms/">MDMS</a>
+						</li>
+						<li>
+							<a href="/frameworkcomponents/report/">Report</a>
+						</li>
+						<li>
+							<a href="/frameworkcomponents/persistor/">Persistor</a>
+						</li>
+						<li>
+							<a href="/frameworkcomponents/indexer/">Indexer</a>
+						</li>
+						<li>
+							<a href="/frameworkcomponents/notification/">Notification</a>
+						</li>
+
+						<li>
+							<a href="/frameworkcomponents/localization/">Localization</a>
+						</li>
+
+						<li>
+							<a href="/frameworkcomponents/uiframework/">UI Framework</a>
+						</li>
+						<li>
+							<a href="/frameworkcomponents/gis/">GIS</a>
+						</li>
+						<li>
+							<a href="/frameworkcomponents/accesscontrolservice/">Access Control Service</a>
+						</li>
+						<li>
+							<a href="/frameworkcomponents/dataencryption/">Data Encryption</a>
+						</li>
+						<li>
+							<a href="/frameworkcomponents/fileservice/">File Service</a>
+						</li>
+						<li>
+							<a href="/frameworkcomponents/workflowengine/">Workflow Engine</a>
+						</li>
+						<li>
+							<a href="/frameworkcomponents/search/">Search As a Service</a>
+						</li>
+						<li>
+							<a href="/frameworkcomponents/datauploader/">Data Uploader</a>
+						</li>
+						<li>
+							<a href="/frameworkcomponents/apigateway/">API Gateway</a>
+						</li>
+						<li>
+							<a href="/frameworkcomponents/integration/">Integration</a>
+						</li>
+						<li>
+							<a href="/frameworkcomponents/pollingservice/">Polling Service</a>
+						</li>
+						<li>
+							<a href="/frameworkcomponents/auditframework/">Audit Framework</a>
+						</li>
+						<li>
+							<a href="/frameworkcomponents/dashboard/">Dashboard</a>
+						</li>
+						<li>
+							<a href="/frameworkcomponents/validator/">Validator</a>
+						</li>
+					</ul>
+
+      <a href="usecases/">
+				<h4 class="sidebar-group-title">Use Cases</h4>
+			</a>
+			<ul class="sidebar-group environmentsetup">
+				<li>
+					<a href="/usecases/pgr/">PGR</a>
+				</li>
+		</ul>
+
+			<a href="environmentsetup/">
+				<h4 class="sidebar-group-title">Environment Setup</h4>
+			</a>
+			<ul class="sidebar-group environmentsetup">
+				<li>
+					<a href="/environmentsetup/prerequsities/">Pre Requsities</a>
+				</li>
+				<li>
+					<a href="/environmentsetup/installationsteps/">Installation Steps</a>
+				</li>
+				</ul>
+</div>
+</div>
+<!-- <script>
+$("a[href$='{{page.url | remove_first: "/" }}']").addClass("sidebar-link-selected");
+</script> -->
+
+
+<script>
+$("a[href$='{{page.url | remove_first: "/" }}']").addClass("sidebar-link-selected");
+</script>
