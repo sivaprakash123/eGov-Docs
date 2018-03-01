@@ -14,27 +14,27 @@ jobs:
       # documented at https://circleci.com/docs/2.0/circleci-images/
       # - image: circleci/postgres:9.4
 
-    working_directory: ~/eGov-Docs
+    working_directory: ~/
 
     steps:
       - checkout
 
       # Download and cache dependencies
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "Gemfile.lock" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
+#      - restore_cache:
+#          keys:
+#          - v1-dependencies-{{ checksum "Gemfile.lock" }}
+#          # fallback to using the latest cache if no exact match is found
+#          - v1-dependencies-
 
-      - run:
-          name: install dependencies
-          command: |
-            bundle install --jobs=4 --retry=3 --path vendor/bundle
+#      - run:
+#          name: install dependencies
+#          command: |
+#            bundle install --jobs=4 --retry=3 --path vendor/bundle
 
-      - save_cache:
-          paths:
-            - ./vendor/bundle
-          key: v1-dependencies-{{ checksum "Gemfile.lock" }}
+#      - save_cache:
+#          paths:
+#            - ./vendor/bundle
+#          key: v1-dependencies-{{ checksum "Gemfile.lock" }}
         
       # Database setup
 #      - run: bundle exec rake db:create
@@ -54,8 +54,8 @@ jobs:
 #                            $TEST_FILES
 
       # collect reports
-      - store_test_results:
-          path: /tmp/test-results
-      - store_artifacts:
-          path: /tmp/test-results
-          destination: test-results
+#      - store_test_results:
+#          path: /tmp/test-results
+#      - store_artifacts:
+#          path: /tmp/test-results
+#          destination: test-results
