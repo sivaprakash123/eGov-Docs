@@ -1,3 +1,3 @@
 #!/bin/sh
-cd service-docs
+cd /var/www/service-docs/
 jekyll serve

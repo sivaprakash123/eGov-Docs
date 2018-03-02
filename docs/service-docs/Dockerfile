@@ -1,4 +1,6 @@
 FROM egovio/ci-jekyll:v1.0
-COPY ../service-docs service-docs
+ENV WEBDIR=/var/www/service-docs/
+RUN mkdir {WEBDIR}
+COPY ./* /var/www/service-docs/
 COPY entrypoint.sh /entrypoint.sh
 CMD ["/entrypoint.sh"]
