@@ -1,0 +1,33 @@
+---
+layout: default
+---
+
+<div class="home">
+
+  <h1 class="page-heading">eGovernments</h1>
+  eGovernments Foundation transforms urban governance with the use of scalable and replicable technology solutions that enable efficient and effective municipal operations, better decision making, and contact-less urban service delivery.
+  <br><br>
+  <h3>Governments</h3>
+  eGov solutions help local self governments achieve technology enablement, process improvements, accountability and transparency at various levels of administration. The data analytics solution also help realise data driven, efficient decision making at highest levels of administration.
+<br><br>
+  <h3>System Integrators</h3>
+  Together, we can meet the hardware, software and infrastructure needs of a client. eGov offers the effort, talent and technology required to successfully execute large green field, turn key projects for governments. Our ready-to-use products helps achieve quicker implementation timeframes, a distinct advantage over your competitors.
+<br><br>
+  <h3>Volunteers</h3>
+  We warmly invite technology and functional experts to actively participate in our initiatives. Our products are built on Java Enterprise Edition stack. As a functional expert, you can help improve our products by contributing in the functional projects that we have on offer.
+
+  <ul class="post-list">
+    {% for post in site.posts %}
+      <li>
+        <!--<span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>-->
+
+        <h2>
+        <!--  <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>-->
+        </h2>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | prepend: site.baseurl }}">via RSS</a></p>
+
+</div>
