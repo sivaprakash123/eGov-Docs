@@ -15,7 +15,7 @@ Report service provides following functionalities
 <li>Reload the configuration at runtime</li>
 <br>
 <h3>Architecture of Report service</h3>
-![mdms architecture](/images/report.png){:class="img-responsive"}
+![mdms architecture](/app/docs/images/report.png){:class="img-responsive"}
 
 Report service is a common component, which will process the request against yml configurations, prepares queries and get data from database and gives back in response. The yml configuration file path, which are configured in the reportFileLocations.txt file are loaded in the application cache memory at the time of deployment of the application or on calling reload api.
 {: .text-justify}

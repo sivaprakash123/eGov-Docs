@@ -16,13 +16,13 @@ The eGov platform is built on the microservices architecture with the business s
 
 <b>Component View</b><br>
 
-![mdms architecture](/images/componentview.png){:class="img-responsive"}
+![mdms architecture](/app/docs/componentview.png){:class="img-responsive"}
 
 
 <b>Architecture View</b><br>
 
-![mdms architecture](/images/architectureview.png){:class="img-responsive"}
+![mdms architecture](/app/docs/architectureview.png){:class="img-responsive"}
 
 <b>Business Applications View</b><br>
 
-![mdms architecture](/images/businessapplicationsview.png){:class="img-responsive"}
+![mdms architecture](/app/docs/businessapplicationsview.png){:class="img-responsive"}
