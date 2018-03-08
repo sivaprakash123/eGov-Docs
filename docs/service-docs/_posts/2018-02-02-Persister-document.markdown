@@ -12,7 +12,7 @@ The configurations of persistor allows for the following
 <li>Query configurations</li>
 {: .text-justify}
 <b>Architecture of Persister</b>
-![mdms architecture](/images/persister.png){:class="img-responsive"}
+![mdms architecture](/app/docs/images/persister.png){:class="img-responsive"}
 
 
 Persister service is a common component, which will pick the request from KAFKA queue based on configured topic names in yml configuration, process the request, prepares queries and run queries to persist the data. The yml configuration file path, which is configured in the persister application.properties file are loaded in the application cache memory at the time of deployment of the application.

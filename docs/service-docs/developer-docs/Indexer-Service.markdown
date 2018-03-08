@@ -16,7 +16,7 @@ Supports custom json indexing with field mappings, Enrichment of the input objec
 Performs Elastic Search down handling.
 {: .text-justify}
 <b>Architecture of Indexer</b>
-![mdms architecture](/images/Indexer arch.png){:class="img-responsive"}
+![mdms architecture](/app/docs/images/Indexer arch.png){:class="img-responsive"}
 
 
 Indexer service is a common component, which will pick the request from KAFKA queue based on configured topic names in yml configuration, and process the request against yml configurations, if the uriMapping is configured, then the indexer calls the specified api with configured details. Once the indexer receives the response, it will map the response data to json, which is specified in index mapping and index the json data. The Indexer service will pull all configurations from git, which are specified in the path, and store in cache on loading the service.

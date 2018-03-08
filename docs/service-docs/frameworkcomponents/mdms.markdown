@@ -11,7 +11,7 @@ The MDMS Service currently supports Create / Update and Search functions on mast
 
 <b>Archictecture</b><br>
 
-![mdms architecture](/images/mdms arch.png){:class="img-responsive"}
+![mdms architecture](/app/docs/images/mdms arch.png){:class="img-responsive"}
 
 
 <b>Configuration</b><br>

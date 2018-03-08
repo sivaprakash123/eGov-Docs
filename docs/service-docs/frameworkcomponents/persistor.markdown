@@ -8,7 +8,7 @@ categories: persister
 The eGov Persistor Service allows third party developers to persist data against a backend data store through a set of configurations defined at an individual business module level. Any data persistence errors or exceptions are logged on the Error Queue (a Kafka queue) to enable Application Monitoring at the platform level. Individual business modules can also subscribe to these errors to perform business module specific error handling.<br>
 {: .text-justify}
 <b>Architecture</b>
-![mdms architecture](/images/persister.png){:class="img-responsive"}
+![mdms architecture](/app/docs/images/persister.png){:class="img-responsive"}
 
 Persistor service listens to the configured Kafka topics, processes the records against the business module specific yaml configuration, and persists data against a configured data store. Each new business application would need an accompanying persistor yml file. The location of the yml file is configured in the application.properties of the persistor service with the key egov.persist.yml.repo.path. Egov.persist.yml.repo.path will have comma separated raw urls of yml config files for all modules. It is recommended that the yml configuration file  be placed under individual module code base under a  persister folder.
 {: .text-justify}

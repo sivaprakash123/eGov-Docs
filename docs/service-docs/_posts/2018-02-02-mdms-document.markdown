@@ -50,7 +50,7 @@ Departments in an organization remains same throughout and added or modified rar
 </pre>
 
 Architecture of MDMS
-![mdms architecture](/images/mdms arch.png){:class="img-responsive"}
+![mdms architecture](/app/docs/images/mdms arch.png){:class="img-responsive"}
 
 
 Organization of MDMS Data:

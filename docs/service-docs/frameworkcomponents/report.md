@@ -10,7 +10,7 @@ categories: report
 The eGov Reporting Service provides a single common interface across modules to define report search and filter criteria and retrieve data. Reporting service configurations for each business module is configured in a module specific yaml configurations file. The reporting service allows transaction data stored in the data store to be combined with master data that is internally retrieved through the eGov MDMS service.<br>
 
 <h3>Architecture</h3><br>
-![mdms architecture](/images/report.png){:class="img-responsive"}
+![mdms architecture](/app/docs/images/report.png){:class="img-responsive"}
 
 Report service processes the request against yaml configurations, prepares and executes queries and retrieves data in a json format. The yaml configuration locations for each business module are configured in the reportFileLocations.txt file stored in egov-services repository under egov-services/docs/reportinfra/report folder. Each business module reports are configured in separate yaml files. The reload API can be used to reload the configurations when a new module is configured or if configurations for a module are changed.
 
